@@ -100,9 +100,9 @@ function setCarrito(item) {
 // pintar carrito
 function pintarCarrito() {
 
-    Object.values(carrito).forEach(item => {
-       
-        items.innerHTML = ''
+    items.innerHTML = ''
+
+    Object.values(carrito).forEach(item => {       
 
         templateCarrito.querySelector('th').textContent = item.id
         templateCarrito.querySelectorAll('td')[0].textContent = item.title
@@ -127,38 +127,61 @@ function pintarFooter() {
     if(Object.keys(carrito).length == 0){
         footer.innerHTML = '<h5>Carrito vacio</h5>'
         pintarCarrito()
+        return
         
-    } else{
-        const nCantidad = Object.values(carrito).reduce((acc, {cantidad}) => acc + cantidad,0)
-        const nPrecio = Object.values(carrito).reduce((total, {cantidad,precio}) => total + cantidad * precio,0)
+    } 
+ 
+    const nCantidad = Object.values(carrito).reduce((acc, {cantidad}) => acc + cantidad,0)
+    const nPrecio = Object.values(carrito).reduce((total, {cantidad,precio}) => total + cantidad * precio,0)
 
-        console.log(nCantidad)
-        console.log(nPrecio)
+    console.log(nCantidad)
+    console.log(nPrecio)
 
-        templateFooter.querySelectorAll('td')[0].textContent = nCantidad
-        templateFooter.querySelector('span').textContent = nPrecio
+    templateFooter.querySelectorAll('td')[0].textContent = nCantidad
+    templateFooter.querySelector('span').textContent = nPrecio
 
-        const clone = templateFooter.cloneNode(true)
-        fragment.appendChild(clone)
-        footer.appendChild(fragment)
+    const clone = templateFooter.cloneNode(true)
+    fragment.appendChild(clone)
+    footer.appendChild(fragment)
 
-        const btnVaciar = document.getElementById('vaciar-carrito')
-        btnVaciar.addEventListener('click', () => {
-            carrito = {}
-        })
-    }
+    const btnVaciar = document.querySelector('#vaciar-carrito')
+    btnVaciar.addEventListener('click', () => {
+        carrito = {}
+         pintarCarrito()
+    })
+    
 
 }
 
 // actionListerner of button of carrito item
 function btnAccion(e) {
 
-
     if(e.target.classList.contains('btn')){
-        console.log(e.target.textContent)
-        
+        console.log(e.target.textContent) 
     }
 
     e.stopPropagation()
-    
 }
+
+const btnAumentarDisminuir = e => {
+    // console.log(e.target.classList.contains('btn-info'))
+    if (e.target.classList.contains('btn-info')) {
+        const producto = carrito[e.target.dataset.id]
+        producto.cantidad++
+        carrito[e.target.dataset.id] = { ...producto }
+        pintarCarrito()
+    }
+
+    if (e.target.classList.contains('btn-danger')) {
+        const producto = carrito[e.target.dataset.id]
+        producto.cantidad--
+        if (producto.cantidad === 0) {
+            delete carrito[e.target.dataset.id]
+        } else {
+            carrito[e.target.dataset.id] = {...producto}
+        }
+        pintarCarrito()
+    }
+    e.stopPropagation()
+}
+
