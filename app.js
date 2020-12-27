@@ -1,5 +1,5 @@
 // leer todo html e depues lo eseguta
-document.addEventListener('DOMContentLoad' , getData())
+document.addEventListener('load' , getData())
 
 // componentes of html
 const fragment = document.createDocumentFragment()
@@ -13,7 +13,10 @@ const templateCarrito = document.getElementById('template-carrito').content
 const templateFooter = document.getElementById('template-footer').content
 
 cards.addEventListener('click', e => { addCart(e) })
-items.addEventListener('click', e => {btnAccion(e)})
+items.addEventListener('click', e => {
+    // if(e.target.classList.contains('btn'))
+        btnAumentarDisminuir(e)
+    });
 
 // carrito
 let carrito = {}
@@ -23,15 +26,23 @@ async function getData(){
     
     try{
 
+        if (localStorage.getItem('carrito')) {
+            carrito = JSON.parse(localStorage.getItem('carrito'))
+            pintarCarrito(carrito)
+        }
+        
         console.log('getData function')
         const res = await fetch('api.json')
         const data = await res.json()
         console.log(data)
         pintarCard(data);
 
+
     } catch (e){
         console.log(e)
     }
+ 
+    
     
 }
 
@@ -107,8 +118,8 @@ function pintarCarrito() {
         templateCarrito.querySelector('th').textContent = item.id
         templateCarrito.querySelectorAll('td')[0].textContent = item.title
         templateCarrito.querySelectorAll('td')[1].textContent = item.cantidad
-        templateCarrito.querySelector('.btn-info').dataset = item.id
-        templateCarrito.querySelector('.btn-danger').dataset = item.id
+        templateCarrito.querySelector('.btn-info').dataset.id = item.id
+        templateCarrito.querySelector('.btn-danger').dataset.id = item.id
         templateCarrito.querySelector('span').textContent = item.cantidad * item.precio
 
         const clone = templateCarrito.cloneNode(true)
@@ -117,6 +128,7 @@ function pintarCarrito() {
 
     items.appendChild(fragment)
     pintarFooter()
+    localStorage.setItem('carrito', JSON.stringify(carrito))
 }
 
 // pintar footer
@@ -126,7 +138,6 @@ function pintarFooter() {
 
     if(Object.keys(carrito).length == 0){
         footer.innerHTML = '<h5>Carrito vacio</h5>'
-        pintarCarrito()
         return
         
     } 
@@ -154,17 +165,10 @@ function pintarFooter() {
 }
 
 // actionListerner of button of carrito item
-function btnAccion(e) {
-
-    if(e.target.classList.contains('btn')){
-        console.log(e.target.textContent) 
-    }
-
-    e.stopPropagation()
-}
-
 const btnAumentarDisminuir = e => {
-    // console.log(e.target.classList.contains('btn-info'))
+    // console.log(carrito[parseInt(e.path[2].querySelector('th').textContent)])
+    console.log(e.target.dataset)
+
     if (e.target.classList.contains('btn-info')) {
         const producto = carrito[e.target.dataset.id]
         producto.cantidad++
